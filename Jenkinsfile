@@ -1,22 +1,20 @@
 pipeline {
   agent any
 
+  environment {
+    AWS_REGION = "ap-south-1"
+  }
+
   stages {
-    stage('Init') {
+    stage('Terraform') {
       steps {
-        sh 'terraform init'
-      }
-    }
-
-    stage('Plan') {
-      steps {
-        sh 'terraform plan'
-      }
-    }
-
-    stage('Apply') {
-      steps {
-        sh 'terraform apply -auto-approve'
+        withCredentials([usernamePassword(credentialsId: 'awscred',
+                                          usernameVariable: 'AWS_ACCESS_KEY_ID',
+                                          passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+          sh 'terraform init'
+          sh 'terraform plan'
+          sh 'terraform apply -auto-approve'
+        }
       }
     }
   }
